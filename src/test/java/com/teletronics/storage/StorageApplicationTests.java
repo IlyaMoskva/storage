@@ -56,7 +56,7 @@ class StorageApplicationTests {
 		FileDocument savedDoc = fileService.storeFile(file, "PUBLIC", List.of("tag1", "tag2"), "user1");
 
 		// Retrieve the document by its ID using the service
-		Optional<FileDocument> retrievedDocOptional = fileService.getFile(savedDoc.getId());
+		Optional<FileDocument> retrievedDocOptional = fileService.getFileById(savedDoc.getId());
 
 		// Verify the document was saved and retrieved successfully
 		assertThat(retrievedDocOptional).isPresent();
@@ -96,5 +96,35 @@ class StorageApplicationTests {
 		assertThatThrownBy(() -> fileService.storeFile(file2, "PUBLIC", List.of("tag1", "tag2"), "user1"))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("File already exists");
+	}
+
+	@Test
+	void testDeleteFileByOwner() throws IOException, NoSuchAlgorithmException {
+		// Create a mock MultipartFile
+		MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Hello, MongoDB!".getBytes());
+
+		// Store the file using the service
+		FileDocument savedDoc = fileService.storeFile(file, "PUBLIC", List.of("tag1", "tag2"), "user1");
+
+		// Delete the file using the correct userId
+		fileService.deleteFile(savedDoc.getId(), "user1");
+
+		// Verify the file is deleted
+		Optional<FileDocument> retrievedDocOptional = fileService.getFileById(savedDoc.getId());
+		assertThat(retrievedDocOptional).isNotPresent();
+	}
+
+	@Test
+	void testDeleteFileByNonOwner() throws IOException, NoSuchAlgorithmException {
+		// Create a mock MultipartFile
+		MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Hello, MongoDB!".getBytes());
+
+		// Store the file using the service
+		FileDocument savedDoc = fileService.storeFile(file, "PUBLIC", List.of("tag1", "tag2"), "user1");
+
+		// Try to delete the file using a different userId and expect an exception
+		assertThatThrownBy(() -> fileService.deleteFile(savedDoc.getId(), "user2"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("User not authorized to delete this file");
 	}
 }

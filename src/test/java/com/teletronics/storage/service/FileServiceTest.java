@@ -74,7 +74,7 @@ class FileServiceTest {
     }
 
     @Test
-    void getFile_shouldReturnFile() {
+    void getFile_shouldReturnFileById() {
         FileDocument fileDocument = new FileDocument();
         fileDocument.setId("1");
         fileDocument.setFilename("test.txt");
@@ -84,17 +84,17 @@ class FileServiceTest {
 
         when(fileRepository.findById("1")).thenReturn(Optional.of(fileDocument));
 
-        Optional<FileDocument> result = fileService.getFile("1");
+        Optional<FileDocument> result = fileService.getFileById("1");
 
         assertTrue(result.isPresent());
         assertEquals("test.txt", result.get().getFilename());
     }
 
     @Test
-    void getFile_shouldReturnEmptyIfFileNotFound() {
+    void getFile_shouldReturnEmptyIfFileByIdNotFound() {
         when(fileRepository.findById("1")).thenReturn(Optional.empty());
 
-        Optional<FileDocument> result = fileService.getFile("1");
+        Optional<FileDocument> result = fileService.getFileById("1");
 
         assertFalse(result.isPresent());
     }

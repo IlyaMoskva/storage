@@ -30,7 +30,7 @@ public class FileController {
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
                                         @RequestParam("visibility") String visibility,
                                         @RequestParam("tags") List<String> tags,
-                                        @RequestParam("userId") String userId) {
+                                        @RequestHeader("userId") String userId) {
         if (tags.size() > 5) {
             return new ResponseEntity<>("Cannot upload more than 5 tags per file", HttpStatus.BAD_REQUEST);
         }
@@ -47,7 +47,7 @@ public class FileController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getFile(@PathVariable String id) {
-        Optional<FileDocument> fileOptional = fileService.getFile(id);
+        Optional<FileDocument> fileOptional = fileService.getFileById(id);
         if (fileOptional.isPresent()) {
             FileDocument fileDocument = fileOptional.get();
             ResponseEntity<byte[]> response = ResponseEntity.ok()
@@ -106,8 +106,9 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteFile(@PathVariable String id) {
-        fileService.deleteFile(id);
+    public ResponseEntity<?> deleteFile(@PathVariable String id,
+                                        @RequestHeader("userId") String userId) {
+        fileService.deleteFile(id, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

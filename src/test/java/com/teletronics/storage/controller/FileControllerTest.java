@@ -48,7 +48,7 @@ class FileControllerTest {
                         .file(file)
                         .param("visibility", "PUBLIC")
                         .param("tags", "tag1", "tag2")
-                        .param("userId", "user1"))
+                        .header("userId", "user1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is("1")))
                 .andExpect(jsonPath("$.filename", is("test.txt")));
@@ -64,7 +64,7 @@ class FileControllerTest {
                         .file(file)
                         .param("visibility", "PUBLIC")
                         .param("tags", "tag1", "tag2", "tag3", "tag4", "tag5", "tag6")
-                        .param("userId", "user1"))
+                        .header("userId", "user1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Cannot upload more than 5 tags per file"));
 
@@ -78,8 +78,9 @@ class FileControllerTest {
         fileDocument.setFilename("test.txt");
         fileDocument.setContentType("text/plain");
         fileDocument.setContent("Hello World".getBytes());
+        fileDocument.setUserId("user1");
 
-        when(fileService.getFile("1")).thenReturn(Optional.of(fileDocument));
+        when(fileService.getFileById("1")).thenReturn(Optional.of(fileDocument));
 
         mockMvc.perform(get("/api/files/1"))
                 .andExpect(status().isOk())
@@ -87,17 +88,17 @@ class FileControllerTest {
                 .andExpect(content().contentType(MediaType.TEXT_PLAIN))
                 .andExpect(content().bytes("Hello World".getBytes()));
 
-        verify(fileService, times(1)).getFile("1");
+        verify(fileService, times(1)).getFileById("1");
     }
 
     @Test
     void getFile_shouldReturnNotFoundWhenFileDoesNotExist() throws Exception {
-        when(fileService.getFile("1")).thenReturn(Optional.empty());
+        when(fileService.getFileById("1")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/files/1"))
                 .andExpect(status().isNotFound());
 
-        verify(fileService, times(1)).getFile("1");
+        verify(fileService, times(1)).getFileById("1");
     }
 
     @Test
@@ -182,11 +183,12 @@ class FileControllerTest {
 
     @Test
     void deleteFile_shouldDeleteFileSuccessfully() throws Exception {
-        doNothing().when(fileService).deleteFile(anyString());
+        doNothing().when(fileService).deleteFile(anyString(), anyString());
 
-        mockMvc.perform(delete("/api/files/1"))
+        mockMvc.perform(delete("/api/files/1")
+                        .header("userId", "user1"))
                 .andExpect(status().isNoContent());
 
-        verify(fileService, times(1)).deleteFile(anyString());
+        verify(fileService, times(1)).deleteFile(anyString(), anyString());
     }
 }

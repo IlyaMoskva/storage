@@ -46,7 +46,7 @@ public class FileService {
         return fileRepository.save(fileDocument);
     }
 
-    public Optional<FileDocument> getFile(String id) {
+    public Optional<FileDocument> getFileById(String id) {
         return fileRepository.findById(id);
     }
 
@@ -73,8 +73,19 @@ public class FileService {
         }
     }
 
-    public void deleteFile(String id) {
-        fileRepository.deleteById(id);
+    public void deleteFile(String fileId, String userId) {
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(fileId);
+
+        if (fileDocumentOptional.isPresent()) {
+            FileDocument fileDocument = fileDocumentOptional.get();
+            if (fileDocument.getUserId().equals(userId)) {
+                fileRepository.delete(fileDocument);
+            } else {
+                throw new IllegalArgumentException("User not authorized to delete this file");
+            }
+        } else {
+            throw new IllegalArgumentException("File not found");
+        }
     }
 
     private String calculateHash(byte[] content) throws NoSuchAlgorithmException {

@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -54,6 +55,23 @@ class FileControllerTest {
                 .andExpect(jsonPath("$.filename", is("test.txt")));
 
         verify(fileService, times(1)).storeFile(any(MultipartFile.class), anyString(), anyList(), anyString());
+    }
+
+    @Test
+    void uploadFile_shouldReturnBadRequestWhenUserIdIsMissing() throws Exception {
+        // Arrange
+        MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Test content".getBytes());
+
+        // Act & Assert
+        mockMvc.perform(multipart("/api/files/upload")
+                        .file(file)
+                        .param("visibility", "PUBLIC")
+                        .param("tags", "tag1,tag2")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
+
+        verify(fileService, times(0)).storeFile(
+                any(MultipartFile.class), anyString(), any(List.class), anyString());
     }
 
     @Test
@@ -190,5 +208,14 @@ class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(fileService, times(1)).deleteFile(anyString(), anyString());
+    }
+
+    @Test
+    void deleteFile_shouldReturnBadRequestWhenUserIdIsMissing() throws Exception {
+        // Act & Assert
+        mockMvc.perform(delete("/api/files/1"))
+                .andExpect(status().isBadRequest());
+
+        verify(fileService, times(0)).deleteFile(anyString(), anyString());
     }
 }

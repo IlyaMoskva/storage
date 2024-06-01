@@ -2,6 +2,7 @@ package com.teletronics.storage.controller;
 
 import com.teletronics.storage.model.FileDocument;
 import com.teletronics.storage.service.FileService;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +31,7 @@ public class FileController {
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
                                         @RequestParam("visibility") String visibility,
                                         @RequestParam("tags") List<String> tags,
-                                        @RequestHeader("userId") String userId) {
+                                        @RequestHeader("userId") @NonNull String userId) {
         if (tags.size() > 5) {
             return new ResponseEntity<>("Cannot upload more than 5 tags per file", HttpStatus.BAD_REQUEST);
         }
@@ -74,7 +75,7 @@ public class FileController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<FileDocument>> listUserFiles(@PathVariable String userId,
+    public ResponseEntity<Page<FileDocument>> listUserFiles(@PathVariable @NonNull String userId,
                                                             @RequestParam int page,
                                                             @RequestParam int size,
                                                             @RequestParam String sortBy,
@@ -107,7 +108,7 @@ public class FileController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteFile(@PathVariable String id,
-                                        @RequestHeader("userId") String userId) {
+                                        @RequestHeader("userId") @NonNull String userId) {
         fileService.deleteFile(id, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -1,13 +1,17 @@
 package com.teletronics.storage.service;
 
 import com.teletronics.storage.model.FileDocument;
+import com.teletronics.storage.model.Tag;
 import com.teletronics.storage.repository.FileRepository;
+import com.teletronics.storage.repository.TagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,10 +22,15 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
+@SpringJUnitConfig
 class FileServiceTest {
 
     @Mock
     private FileRepository fileRepository;
+
+    @Mock
+    private TagRepository tagRepository;
 
     @InjectMocks
     private FileService fileService;
@@ -33,6 +42,10 @@ class FileServiceTest {
 
     @Test
     void storeFile_shouldStoreFileSuccessfully() throws IOException, NoSuchAlgorithmException {
+        // Mock behavior of tagRepository
+        when(tagRepository.findByNameIgnoreCase("tag1")).thenReturn(Optional.of(new Tag()));
+        when(tagRepository.findByNameIgnoreCase("tag2")).thenReturn(Optional.of(new Tag()));
+
         MultipartFile multipartFile = mock(MultipartFile.class);
         when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
         when(multipartFile.getBytes()).thenReturn("Hello World".getBytes());

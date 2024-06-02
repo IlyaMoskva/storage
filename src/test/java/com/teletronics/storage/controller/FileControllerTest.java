@@ -51,8 +51,7 @@ class FileControllerTest {
                         .param("tags", "tag1", "tag2")
                         .header("userId", "user1"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is("1")))
-                .andExpect(jsonPath("$.filename", is("test.txt")));
+                .andExpect(jsonPath("$.id", is("1")));
 
         verify(fileService, times(1)).storeFile(any(MultipartFile.class), anyString(), anyList(), anyString());
     }

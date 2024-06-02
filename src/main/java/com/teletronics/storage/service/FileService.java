@@ -1,5 +1,7 @@
 package com.teletronics.storage.service;
 
+import com.teletronics.storage.model.Tag;
+import com.teletronics.storage.repository.TagRepository;
 import org.apache.tika.Tika;
 import com.teletronics.storage.model.FileDocument;
 import com.teletronics.storage.repository.FileRepository;
@@ -16,12 +18,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     private final Tika tika = new Tika();
 
@@ -32,6 +38,12 @@ public class FileService {
             throw new IllegalArgumentException("File already exists");
         }
 
+        // Validate tags
+        List<Tag> validatedTags = tags.stream()
+                .map(tag -> tagRepository.findByNameIgnoreCase(tag)
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid tag: " + tag)))
+                .collect(Collectors.toList());
+
         FileDocument fileDocument = new FileDocument();
         fileDocument.setFilename(file.getOriginalFilename());
         fileDocument.setContentType(file.getContentType() != null ? file.getContentType() : tika.detect(new ByteArrayInputStream(file.getBytes())));
@@ -39,7 +51,7 @@ public class FileService {
         fileDocument.setFileSize(file.getSize());
         fileDocument.setUploadDate(new Date());
         fileDocument.setVisibility(visibility);
-        fileDocument.setTags(tags);
+        fileDocument.setTags(validatedTags.stream().map(Tag::getName).collect(Collectors.toList()));
         fileDocument.setUserId(userId);
         fileDocument.setHash(hash);
 

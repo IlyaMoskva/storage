@@ -50,7 +50,7 @@ class FileControllerTest {
                         .param("visibility", "PUBLIC")
                         .param("tags", "tag1", "tag2")
                         .header("userId", "user1"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is("1")))
                 .andExpect(jsonPath("$.filename", is("test.txt")));
 

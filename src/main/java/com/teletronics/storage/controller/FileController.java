@@ -17,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -38,7 +40,9 @@ public class FileController {
 
         try {
             FileDocument fileDocument = fileService.storeFile(file, visibility, tags, userId);
-            return new ResponseEntity<>(fileDocument, HttpStatus.OK);
+            Map<String, String> response = new HashMap<>();
+            response.put("id", fileDocument.getId());
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (IOException | NoSuchAlgorithmException e) {
             return new ResponseEntity<>("Error uploading file", HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IllegalArgumentException e) {

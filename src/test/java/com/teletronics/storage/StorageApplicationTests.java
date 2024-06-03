@@ -15,8 +15,8 @@ class StorageApplicationTests {
 
 	private static MongoDBContainer mongoDBContainer;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+	//@Autowired
+	//private MongoTemplate mongoTemplate;
 
 	@BeforeAll
 	public static void setUp() {
@@ -28,7 +28,7 @@ class StorageApplicationTests {
 
 	@BeforeEach
 	public void cleanDatabase() {
-		mongoTemplate.getDb().drop();
+		//mongoTemplate.getDb().drop();
 	}
 
 	@Test
